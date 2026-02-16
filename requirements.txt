@@ -1,0 +1,5 @@
+eel
+yfinance
+polars
+pandas
+openpyxl

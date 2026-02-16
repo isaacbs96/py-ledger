@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Financeiro Pessoal</title>
+    <link rel="stylesheet" href="style.css">
+    <script type="text/javascript" src="/eel.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    <div id="global-loader" class="loader-overlay">
+        <div class="spinner"></div>
+        <p style="color: var(--text-primary); font-weight: 500; font-size: 1.1rem; letter-spacing: 0.5px;">Atualizando Banco de Dados...</p>
+    </div>
+
+    <header>
+        <h1>Financeiro</h1>
+        <div class="tabs">
+            <button class="tab-btn active" onclick="openTab('dashboard', this)">Visão Geral</button>
+            <button class="tab-btn" onclick="openTab('movimentacoes', this)">Rendas & Gastos</button>
+            <button class="tab-btn" onclick="openTab('cartoes', this)">Cartões</button>
+            <button class="tab-btn" onclick="openTab('investimentos', this)">Investimentos</button>
+            <button class="tab-btn" onclick="openTab('metas', this)">Metas & Orçamento</button>
+        </div>
+    </header>
+
+    <main>
+        <div id="dashboard" class="tab-content active">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 20px;">
+                <div class="card">
+                    <h2>Fluxo Mensal</h2>
+                    <p style="color: var(--text-secondary)">Sobra Prevista</p>
+                    <span id="dash-sobra" class="big-number text-primary">R$ 0,00</span>
+                    <div style="margin-top: 10px; font-size: 0.85rem; color: var(--text-secondary);">
+                        Rendas: <span id="dash-renda" class="text-success">R$ 0,00</span> | Gastos: <span id="dash-gastos" class="text-danger">R$ 0,00</span>
+                    </div>
+                </div>
+
+                <div class="card" style="border-color: var(--primary);">
+                    <h2>Investimentos</h2>
+                    <p style="color: var(--text-secondary)">Patrimônio Total</p>
+                    <span id="dash-patrimonio" class="big-number">R$ 0,00</span>
+                    <p style="margin-top: 10px; font-size: 0.85rem; color: var(--text-secondary);">
+                        Lucro Atual: <strong id="dash-lucro-inv">R$ 0,00</strong>
+                    </p>
+                </div>
+
+                <div class="card" style="border-color: var(--success);">
+                    <h2>Proventos (Mês)</h2>
+                    <p style="color: var(--text-secondary)">Dividendos Esperados</p>
+                    <span id="dash-dividendos" class="big-number text-success">R$ 0,00</span>
+                    <p id="dash-dias-pagamento" style="margin-top: 10px; font-size: 0.8rem; color: var(--text-secondary);">
+                        Dias de Pagamento: Calculando...
+                    </p>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px;">
+                <div class="card">
+                    <h2>Distribuição de Gastos</h2>
+                    <div style="height: 300px; display: flex; align-items: center; justify-content: center;">
+                        <canvas id="chartGastos"></canvas>
+                    </div>
+                </div>
+                <div class="card">
+                    <h2>Próximas Faturas</h2>
+                    <div id="dash-lista-faturas" style="display: flex; flex-direction: column; gap: 10px; margin-top: 15px;">
+                        <p style="color: var(--text-secondary); font-size: 0.9rem;">Carregando faturas...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="movimentacoes" class="tab-content">
+            <div class="grid-2">
+                <div class="card">
+                    <h2>Rendas</h2>
+                    <div class="form-group">
+                        <input type="text" id="renda-desc" placeholder="Descrição">
+                        <input type="text" id="renda-val" placeholder="Valor (Ex: 1200,00)">
+                        <select id="renda-tipo">
+                            <option value="ativa">Ativa</option>
+                            <option value="passiva">Passiva</option>
+                        </select>
+                        <select id="renda-categoria">
+                            <option value="Salário">Salário</option>
+                            <option value="Vale Alimentação">Vale Alimentação</option>
+                            <option value="Projetos">Projetos/Freelance</option>
+                            <option value="Outros">Outros</option>
+                        </select>
+                        <button class="btn btn-primary" onclick="addRenda()">Salvar</button>
+                    </div>
+                    <div style="max-height:350px; overflow-y:auto; margin-top:20px;">
+                        <table id="tabela-rendas">
+                            <thead><tr><th>Descrição</th><th>Valor</th><th></th></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card">
+                    <h2>Gastos da Conta</h2>
+                    <div class="form-group">
+                        <input type="text" id="gasto-desc" placeholder="Descrição">
+                        <input type="text" id="gasto-val" placeholder="Valor (Ex: 150,50)">
+                        <input type="date" id="gasto-data">
+                    </div>
+                    <div class="form-group">
+                        <label style="color: var(--text-secondary); display:flex; align-items:center; gap:8px;">
+                            <input type="checkbox" id="gasto-rec" checked style="flex:none; width:auto;"> Recorrente?
+                        </label>
+                        <select id="gasto-cat-meta" class="form-select" style="margin-left: auto;"></select>
+                        <button class="btn btn-primary" onclick="addGasto()">Salvar</button>
+                    </div>
+                    <div style="max-height:350px; overflow-y:auto; margin-top:20px;">
+                        <table id="tabela-gastos">
+                            <thead><tr><th>Descrição</th><th>Valor</th><th></th></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="cartoes" class="tab-content">
+            <div class="grid-2">
+                <div class="card">
+                    <h2>Novo Cartão</h2>
+                    <div class="form-group">
+                        <input type="text" id="card-apelido" placeholder="Nome (Ex: Nubank)">
+                        <input type="text" id="card-limite" placeholder="Limite (Ex: 5000,00)">
+                    </div>
+                    <div class="form-group">
+                        <input type="number" id="card-fecha" placeholder="Dia Fecha">
+                        <input type="number" id="card-vence" placeholder="Dia Vence">
+                        <button class="btn btn-primary" onclick="cadastrarCartao()">Criar</button>
+                    </div>
+                    <h3 style="margin-top:30px; margin-bottom: 15px; font-size:0.8rem; color:var(--text-secondary); text-transform: uppercase;">Limites Disponíveis</h3>
+                    <div id="lista-limites"></div>
+                </div>
+
+                <div class="card">
+                    <h2>Lançar Compra</h2>
+                    <div class="form-group">
+                        <select id="sel-cartoes-disponiveis"><option>Carregando...</option></select>
+                        <input type="date" id="compra-data">
+                    </div>
+                    <div class="form-group">
+                        <input type="text" id="compra-desc" placeholder="Ex: UBER* Viagem">
+                        <input type="text" id="compra-val" placeholder="Valor Total">
+                        <input type="number" id="compra-parc" placeholder="Parcelas" value="1">
+                    </div>
+                    <div class="form-group">
+                        <select id="compra-cat-meta" class="form-select" style="flex: 1;"></select>
+                        <button class="btn btn-primary" onclick="lancarCompra()">Lançar Compra</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="metas" class="tab-content">
+            <div class="grid-2">
+                <div>
+                    <div class="card" style="margin-bottom: 20px;">
+                        <h2>Distribuição do Orçamento</h2>
+                        <div style="height: 250px; display: flex; align-items: center; justify-content: center;">
+                            <canvas id="chartMetas"></canvas>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h2>Criar Nova Meta</h2>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <input type="text" id="nova-meta-nome" placeholder="Nome (Ex: Viagens)">
+                            <input type="number" id="nova-meta-pct" placeholder="Porcentagem (%)" style="max-width: 120px;">
+                            <button class="btn btn-primary" onclick="criarNovaMeta()">Criar</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h2 style="margin: 0;">Limites & Consumo do Mês</h2>
+                        <span id="soma-pct-metas" style="font-size: 0.9rem; color: var(--text-secondary);">Total: 0%</span>
+                    </div>
+                    <div id="lista-metas" style="display: flex; flex-direction: column; gap: 20px; max-height: 400px; overflow-y: auto; padding-right: 10px;"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="investimentos" class="tab-content">
+            <div class="card">
+                <h2>Novo Aporte</h2>
+                <div class="form-group">
+                    <input type="text" id="inv-ticker" placeholder="Ticker">
+                    <input type="number" id="inv-qtd" placeholder="Qtd" oninput="autoCalcTotal()">
+                    <input type="text" id="inv-pm" placeholder="Preço Unit (Ex: 10,00)" oninput="autoCalcTotal()">
+                </div>
+                <div class="form-group">
+                    <input type="text" id="inv-total" placeholder="Total Pago (R$)">
+                    <select id="inv-tipo"><option value="FII">FII</option><option value="ACAO">Ação</option></select>
+                    <button class="btn btn-primary" onclick="addInvestimento()">Salvar</button>
+                </div>
+                <small style="color: var(--text-secondary); font-size: 0.8rem;">*O Total é calculado automático, mas você pode alterar para incluir taxas.</small>
+            </div>
+            
+            <div class="card" style="margin-top: 20px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h2 style="margin: 0;">Carteira</h2>
+                    <button class="btn btn-flat" style="border: 1px solid var(--border); font-size: 0.8rem; padding: 8px 16px;" onclick="loadInvestimentos()">Atualizar Cotações</button>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Ativo</th>
+                            <th>Qtd</th>
+                            <th>Preço Unit</th>
+                            <th>Total Pago</th>
+                            <th>Valor Hoje</th>
+                            <th>Lucro</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabela-inv-body"></tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script src="scripts.js"></script>
+    <script>
+        document.querySelectorAll('input[type="date"]').forEach(i => i.value = new Date().toISOString().split('T')[0]);
+        loadDashboard();
+    </script>
+</body>
+</html>

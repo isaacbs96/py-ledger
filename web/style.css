@@ -1,0 +1,105 @@
+@font-face {
+    font-family: 'Albert Sans';
+    src: url('fonts/AlbertSans-VariableFont_wght.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+}
+
+:root {
+    --bg-app: #000000;
+    --bg-card: #18181B;
+    --border: #27272A;
+    --primary: #006FEE;
+    --success: #17C964;
+    --danger: #F31260;
+    --warning: #F5A524;
+    --text-primary: #FFFFFF;
+    --text-secondary: #A1A1AA;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Albert Sans', sans-serif; }
+
+body { background-color: var(--bg-app); color: var(--text-primary); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+
+header { padding: 20px 30px; background: var(--bg-app); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 30px; }
+h1 { font-size: 1.4rem; font-weight: 600; }
+
+.tabs { display: flex; gap: 8px; }
+.tab-btn { background: transparent; border: none; color: var(--text-secondary); padding: 10px 18px; border-radius: 99px; font-weight: 500; cursor: pointer; transition: all 0.2s ease; }
+.tab-btn:hover { color: var(--text-primary); background: rgba(255,255,255,0.05); }
+.tab-btn.active { background: var(--border); color: var(--text-primary); }
+
+main { flex: 1; padding: 30px; overflow-y: auto; }
+
+.tab-content { display: none !important; }
+.tab-content.active { display: block !important; animation: fadeIn 0.4s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+.card { background: var(--bg-card); padding: 24px; border-radius: 16px; border: 1px solid var(--border); }
+h2 { font-size: 1.1rem; margin-bottom: 20px; color: var(--text-primary); font-weight: 600; }
+
+.big-number { font-size: 2.5rem; font-weight: 700; display: block; margin-top: 5px; letter-spacing: -1px; }
+.text-success { color: var(--success) !important; }
+.text-danger { color: var(--danger) !important; }
+.text-primary { color: var(--primary) !important; }
+
+.form-group { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 15px; align-items: center; }
+input, select { background: var(--bg-app); border: 1px solid var(--border); color: var(--text-primary); padding: 12px 16px; border-radius: 12px; outline: none; flex: 1; transition: all 0.2s; font-size: 0.95rem; }
+input::placeholder { color: var(--text-secondary); }
+input:focus, select:focus { border-color: var(--primary); }
+
+.btn { border: none; padding: 12px 24px; border-radius: 14px; cursor: pointer; font-weight: 500; transition: 0.2s; font-size: 0.95rem; display: inline-flex; align-items: center; justify-content: center; }
+.btn-primary { background: var(--primary); color: #FFF; }
+.btn-primary:hover { opacity: 0.85; }
+.btn-flat { background: transparent; color: var(--text-secondary); }
+.btn-flat:hover { color: var(--text-primary); background: var(--border); }
+.btn-danger-flat { background: transparent; color: var(--danger); border-radius: 8px; padding: 6px 10px; }
+.btn-danger-flat:hover { background: rgba(243, 18, 96, 0.1); }
+
+table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.9rem; }
+th { text-align: left; color: var(--text-secondary); padding: 12px 10px; border-bottom: 1px solid var(--border); font-weight: 500; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.5px; }
+td { padding: 14px 10px; border-bottom: 1px solid var(--border); color: var(--text-primary); }
+
+.progress-bar-bg { background: var(--bg-app); height: 8px; border-radius: 99px; margin-top: 8px; width: 100%; overflow: hidden; }
+.progress-bar-fill { background: var(--primary); height: 100%; border-radius: 99px; transition: width 0.5s; }
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-app); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: #3f3f46; }
+
+/* =========================================
+   OVERLAY DE CARREGAMENTO (LOADING SPINNER)
+   ========================================= */
+.loader-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(4px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+.loader-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+.spinner {
+    width: 50px; height: 50px;
+    border: 4px solid var(--border);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 15px;
+}
+@keyframes spin { 
+    0% { transform: rotate(0deg); } 
+    100% { transform: rotate(360deg); } 
+}
